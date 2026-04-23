@@ -128,26 +128,16 @@ const I = {
   ),
 };
 
-// ─── LOGO — matches real MA2E brand mark ──────────────────────────────────────
+// ─── LOGO — image logo (uploads/images.png) ───────────────────────────────────
 const Logo = ({ dark = false, size = 'md' }) => {
   const scale = size === 'lg' ? 1.4 : size === 'sm' ? 0.8 : 1;
-  const w = Math.round(72 * scale), h = Math.round(40 * scale), fs = Math.round(22 * scale);
+  const h = Math.round(48 * scale);
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 3, flexShrink: 0 }}>
-      {/* Green badge with MA2E wordmark */}
-      <div style={{
-        width: w, height: h, borderRadius: 4, background: C.green,
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0, padding: '0 6px',
-      }}>
-        <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: fs, color: '#fff', letterSpacing: '-1px', lineHeight: 1 }}>MA</span>
-        <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: fs, color: C.orange, letterSpacing: '-1px', lineHeight: 1 }}>2</span>
-        <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: fs, color: '#fff', letterSpacing: '-1px', lineHeight: 1 }}>E</span>
-      </div>
-      {/* Tagline */}
-      <div style={{ fontSize: Math.round(7 * scale), letterSpacing: '0.3px', color: dark ? 'rgba(255,255,255,0.45)' : C.green, fontStyle: 'italic', lineHeight: 1, paddingLeft: 1 }}>
-        Mutuelle des Agents de l'Eau et de l'Electricité
-      </div>
-    </div>
+    <img
+      src="uploads/images.png"
+      alt="MA2E — Mutuelle des Agents de l'Eau et de l'Electricité"
+      style={{ height: h, width: 'auto', display: 'block' }}
+    />
   );
 };
 
@@ -195,100 +185,268 @@ const NAV_ITEMS = [
   { label: 'Contact', page: 'contact' },
 ];
 
+// Hamburger icon
+const HamburgerIcon = ({ open }) => (
+  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke={C.dark} strokeWidth="1.8" strokeLinecap="round">
+    {open ? (
+      <>
+        <line x1="4" y1="4" x2="18" y2="18"/>
+        <line x1="18" y1="4" x2="4" y2="18"/>
+      </>
+    ) : (
+      <>
+        <line x1="3" y1="6" x2="19" y2="6"/>
+        <line x1="3" y1="11" x2="19" y2="11"/>
+        <line x1="3" y1="16" x2="19" y2="16"/>
+      </>
+    )}
+  </svg>
+);
+
 const Nav = ({ currentPage, navigate }) => {
   const [openDD, setOpenDD] = React.useState(null);
   const [scrolled, setScrolled] = React.useState(false);
+  const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [mobileExpanded, setMobileExpanded] = React.useState(null);
+  const [isMobile, setIsMobile] = React.useState(window.innerWidth < 960);
 
   React.useEffect(() => {
-    const h = () => setScrolled(window.scrollY > 40);
-    window.addEventListener('scroll', h);
-    return () => window.removeEventListener('scroll', h);
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    const onResize = () => {
+      const mobile = window.innerWidth < 960;
+      setIsMobile(mobile);
+      if (!mobile) setMobileOpen(false);
+    };
+    window.addEventListener('scroll', onScroll);
+    window.addEventListener('resize', onResize);
+    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onResize); };
   }, []);
 
-  const go = (page, hash) => { navigate(page, hash); setOpenDD(null); };
+  // Lock body scroll when mobile menu open
+  React.useEffect(() => {
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
+
+  const go = (page, hash) => {
+    navigate(page, hash);
+    setOpenDD(null);
+    setMobileOpen(false);
+    setMobileExpanded(null);
+  };
 
   return (
-    <nav style={{
-      background: scrolled ? 'rgba(255,255,255,0.97)' : '#fff',
-      borderBottom: `1px solid ${scrolled ? '#e8e8e0' : '#f0f0e8'}`,
-      position: 'sticky', top: 0, zIndex: 200,
-      backdropFilter: 'blur(8px)',
-      transition: 'border-color 0.2s, background 0.2s',
-    }}>
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 48px', height: 68, display: 'flex', alignItems: 'center', gap: 0 }}>
-        <button onClick={() => go('home')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginRight: 48, flexShrink: 0 }}>
-          <Logo />
-        </button>
+    <>
+      <nav style={{
+        background: scrolled ? 'rgba(255,255,255,0.97)' : '#fff',
+        borderBottom: `1px solid ${scrolled ? '#e8e8e0' : '#f0f0e8'}`,
+        position: 'sticky', top: 0, zIndex: 200,
+        backdropFilter: 'blur(8px)',
+        transition: 'border-color 0.2s, background 0.2s',
+      }}>
+        <div style={{ maxWidth: 1280, margin: '0 auto', padding: isMobile ? '0 20px' : '0 48px', height: isMobile ? 60 : 68, display: 'flex', alignItems: 'center' }}>
 
-        <div style={{ display: 'flex', alignItems: 'center', flex: 1, gap: 0 }}>
-          {NAV_ITEMS.map(item => (
-            <div key={item.label} style={{ position: 'relative' }}
-              onMouseEnter={() => item.sub && setOpenDD(item.label)}
-              onMouseLeave={() => setOpenDD(null)}>
-              <button onClick={() => go(item.page)} style={{
-                background: 'none', border: 'none', cursor: 'pointer',
-                padding: '8px 14px', fontSize: 13.5, fontFamily: 'Inter, sans-serif',
-                color: currentPage === item.page ? C.dark : '#555',
-                fontWeight: currentPage === item.page ? 500 : 400,
-                display: 'flex', alignItems: 'center', gap: 4,
-                position: 'relative', whiteSpace: 'nowrap',
-                transition: 'color 0.12s',
-              }}
-              onMouseEnter={e => { if (currentPage !== item.page) e.currentTarget.style.color = C.dark; }}
-              onMouseLeave={e => { if (currentPage !== item.page) e.currentTarget.style.color = '#555'; }}
-              >
-                {item.label}
-                {item.sub && <I.ChevDown c={currentPage === item.page ? C.dark : '#bbb'}/>}
-                {/* Active indicator */}
-                {currentPage === item.page && (
-                  <span style={{ position: 'absolute', bottom: -1, left: 14, right: 14, height: 2, background: C.green, borderRadius: 1 }}/>
-                )}
-              </button>
+          {/* Logo */}
+          <button onClick={() => go('home')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginRight: isMobile ? 'auto' : 48, flexShrink: 0 }}>
+            <Logo size={isMobile ? 'sm' : 'md'} />
+          </button>
 
-              {item.sub && openDD === item.label && (
-                <div style={{ position: 'absolute', top: 'calc(100% + 1px)', left: 0, background: '#fff', border: '1px solid #e8e8e0', borderTop: `2px solid ${C.green}`, minWidth: 210, zIndex: 300, boxShadow: '0 12px 32px rgba(0,0,0,0.08)' }}>
-                  {item.sub.map(s => (
-                    <button key={s.label} onClick={() => go(s.page, s.hash)} style={{
-                      display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left',
-                      padding: '11px 18px', background: 'none', border: 'none', cursor: 'pointer',
-                      fontSize: 13, fontFamily: 'Inter, sans-serif', color: '#444',
-                      borderBottom: '1px solid #f5f5f0', transition: 'background 0.1s',
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.background = '#f8f8f4'; e.currentTarget.style.color = C.dark; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#444'; }}
-                    >
-                      <I.ChevRight s={10} c="#ccc"/> {s.label}
-                    </button>
-                  ))}
+          {/* Desktop nav */}
+          {!isMobile && (
+            <div style={{ display: 'flex', alignItems: 'center', flex: 1, gap: 0 }}>
+              {NAV_ITEMS.map(item => (
+                <div key={item.label} style={{ position: 'relative' }}
+                  onMouseEnter={() => item.sub && setOpenDD(item.label)}
+                  onMouseLeave={() => setOpenDD(null)}>
+                  <button onClick={() => go(item.page)} style={{
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    padding: '8px 14px', fontSize: 13.5, fontFamily: 'Inter, sans-serif',
+                    color: currentPage === item.page ? C.dark : '#555',
+                    fontWeight: currentPage === item.page ? 500 : 400,
+                    display: 'flex', alignItems: 'center', gap: 4,
+                    position: 'relative', whiteSpace: 'nowrap',
+                    transition: 'color 0.12s',
+                  }}
+                  onMouseEnter={e => { if (currentPage !== item.page) e.currentTarget.style.color = C.dark; }}
+                  onMouseLeave={e => { if (currentPage !== item.page) e.currentTarget.style.color = '#555'; }}
+                  >
+                    {item.label}
+                    {item.sub && <I.ChevDown c={currentPage === item.page ? C.dark : '#bbb'}/>}
+                    {currentPage === item.page && (
+                      <span style={{ position: 'absolute', bottom: -1, left: 14, right: 14, height: 2, background: C.green, borderRadius: 1 }}/>
+                    )}
+                  </button>
+
+                  {item.sub && openDD === item.label && (
+                    <div style={{ position: 'absolute', top: 'calc(100% + 1px)', left: 0, background: '#fff', border: '1px solid #e8e8e0', borderTop: `2px solid ${C.green}`, minWidth: 210, zIndex: 300, boxShadow: '0 12px 32px rgba(0,0,0,0.08)' }}>
+                      {item.sub.map(s => (
+                        <button key={s.label} onClick={() => go(s.page, s.hash)} style={{
+                          display: 'flex', alignItems: 'center', gap: 8, width: '100%', textAlign: 'left',
+                          padding: '11px 18px', background: 'none', border: 'none', cursor: 'pointer',
+                          fontSize: 13, fontFamily: 'Inter, sans-serif', color: '#444',
+                          borderBottom: '1px solid #f5f5f0', transition: 'background 0.1s',
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.background = '#f8f8f4'; e.currentTarget.style.color = C.dark; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#444'; }}
+                        >
+                          <I.ChevRight s={10} c="#ccc"/> {s.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
+              ))}
             </div>
-          ))}
-        </div>
+          )}
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <button onClick={() => go('documents')} style={{
-            background: 'none', border: 'none', padding: '6px 12px', fontSize: 13, fontFamily: 'Inter, sans-serif',
-            cursor: 'pointer', color: '#666', display: 'flex', alignItems: 'center', gap: 5, transition: 'color 0.12s',
-          }}
-          onMouseEnter={e => e.currentTarget.style.color = C.dark}
-          onMouseLeave={e => e.currentTarget.style.color = '#666'}>
-            <I.Download s={13} c="currentColor"/> Documents
-          </button>
-          <div style={{ width: 1, height: 18, background: '#e0e0d8' }}/>
-          <button style={{
-            background: C.orange, color: '#fff', border: 'none',
-            padding: '9px 20px', fontSize: 13, fontFamily: 'Inter, sans-serif', cursor: 'pointer',
-            fontWeight: 500, display: 'flex', alignItems: 'center', gap: 7, letterSpacing: '-0.1px',
-            transition: 'background 0.12s',
-          }}
-          onMouseEnter={e => e.currentTarget.style.background = '#e8830a'}
-          onMouseLeave={e => e.currentTarget.style.background = C.orange}>
-            Espace adhérent <I.Arrow c="#fff" s={13}/>
-          </button>
+          {/* Desktop CTA */}
+          {!isMobile && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <button onClick={() => go('documents')} style={{
+                background: 'none', border: 'none', padding: '6px 12px', fontSize: 13, fontFamily: 'Inter, sans-serif',
+                cursor: 'pointer', color: '#666', display: 'flex', alignItems: 'center', gap: 5, transition: 'color 0.12s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.color = C.dark}
+              onMouseLeave={e => e.currentTarget.style.color = '#666'}>
+                <I.Download s={13} c="currentColor"/> Documents
+              </button>
+              <div style={{ width: 1, height: 18, background: '#e0e0d8' }}/>
+              <button style={{
+                background: C.orange, color: '#fff', border: 'none',
+                padding: '9px 20px', fontSize: 13, fontFamily: 'Inter, sans-serif', cursor: 'pointer',
+                fontWeight: 500, display: 'flex', alignItems: 'center', gap: 7, letterSpacing: '-0.1px',
+                transition: 'background 0.12s',
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = '#e8830a'}
+              onMouseLeave={e => e.currentTarget.style.background = C.orange}>
+                Espace adhérent <I.Arrow c="#fff" s={13}/>
+              </button>
+            </div>
+          )}
+
+          {/* Mobile: Espace adhérent pill + burger */}
+          {isMobile && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <button style={{
+                background: C.orange, color: '#fff', border: 'none',
+                padding: '7px 14px', fontSize: 12, fontFamily: 'Inter, sans-serif', cursor: 'pointer',
+                fontWeight: 500, borderRadius: 2, whiteSpace: 'nowrap',
+              }}>
+                Espace adhérent
+              </button>
+              <button
+                onClick={() => setMobileOpen(o => !o)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 4 }}
+                aria-label="Menu"
+              >
+                <HamburgerIcon open={mobileOpen} />
+              </button>
+            </div>
+          )}
         </div>
-      </div>
-    </nav>
+      </nav>
+
+      {/* Mobile drawer overlay */}
+      {isMobile && (
+        <>
+          {/* Backdrop */}
+          {mobileOpen && (
+            <div
+              onClick={() => setMobileOpen(false)}
+              style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 198, backdropFilter: 'blur(2px)' }}
+            />
+          )}
+          {/* Drawer */}
+          <div style={{
+            position: 'fixed', top: 60, right: 0, bottom: 0,
+            width: Math.min(320, window.innerWidth),
+            background: '#fff',
+            zIndex: 199,
+            transform: mobileOpen ? 'translateX(0)' : 'translateX(100%)',
+            transition: 'transform 0.28s cubic-bezier(0.4,0,0.2,1)',
+            overflowY: 'auto',
+            display: 'flex', flexDirection: 'column',
+            boxShadow: '-8px 0 32px rgba(0,0,0,0.1)',
+          }}>
+            <div style={{ flex: 1, padding: '8px 0 24px' }}>
+              {NAV_ITEMS.map(item => (
+                <div key={item.label}>
+                  {item.sub ? (
+                    <>
+                      <button
+                        onClick={() => setMobileExpanded(mobileExpanded === item.label ? null : item.label)}
+                        style={{
+                          width: '100%', background: 'none', border: 'none', cursor: 'pointer',
+                          padding: '14px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                          fontSize: 15, fontFamily: 'Inter, sans-serif',
+                          color: currentPage === item.page ? C.dark : '#333',
+                          fontWeight: currentPage === item.page ? 500 : 400,
+                          borderBottom: '1px solid #f0f0e8',
+                        }}
+                      >
+                        <span>{item.label}</span>
+                        <span style={{
+                          transform: mobileExpanded === item.label ? 'rotate(180deg)' : 'rotate(0)',
+                          transition: 'transform 0.2s', display: 'inline-flex',
+                        }}>
+                          <I.ChevDown s={13} c="#aaa"/>
+                        </span>
+                      </button>
+                      {mobileExpanded === item.label && (
+                        <div style={{ background: '#fafaf8', borderBottom: '1px solid #f0f0e8' }}>
+                          {item.sub.map(s => (
+                            <button key={s.label} onClick={() => go(s.page, s.hash)} style={{
+                              width: '100%', background: 'none', border: 'none', cursor: 'pointer',
+                              padding: '11px 24px 11px 38px', display: 'flex', alignItems: 'center', gap: 8,
+                              fontSize: 13.5, fontFamily: 'Inter, sans-serif', color: '#555',
+                              borderBottom: '1px solid #f0f0e8', textAlign: 'left',
+                            }}>
+                              <I.ChevRight s={10} c={C.green}/> {s.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <button onClick={() => go(item.page)} style={{
+                      width: '100%', background: 'none', border: 'none', cursor: 'pointer',
+                      padding: '14px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      fontSize: 15, fontFamily: 'Inter, sans-serif',
+                      color: currentPage === item.page ? C.dark : '#333',
+                      fontWeight: currentPage === item.page ? 500 : 400,
+                      borderBottom: '1px solid #f0f0e8', textAlign: 'left',
+                    }}>
+                      {item.label}
+                      {currentPage === item.page && <span style={{ width: 4, height: 4, borderRadius: '50%', background: C.green }}/>}
+                    </button>
+                  )}
+                </div>
+              ))}
+
+              <button onClick={() => go('documents')} style={{
+                width: '100%', background: 'none', border: 'none', cursor: 'pointer',
+                padding: '14px 24px', display: 'flex', alignItems: 'center', gap: 8,
+                fontSize: 15, fontFamily: 'Inter, sans-serif', color: '#333',
+                borderBottom: '1px solid #f0f0e8', textAlign: 'left',
+              }}>
+                <I.Download s={14} c="#aaa"/> Documents
+              </button>
+            </div>
+
+            {/* Bottom CTA */}
+            <div style={{ padding: '16px 20px', borderTop: '1px solid #f0f0e8' }}>
+              <button style={{
+                width: '100%', background: C.orange, color: '#fff', border: 'none',
+                padding: '13px', fontSize: 14, fontFamily: 'Inter, sans-serif', cursor: 'pointer',
+                fontWeight: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              }}>
+                Espace adhérent <I.Arrow c="#fff" s={14}/>
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </>
   );
 };
 

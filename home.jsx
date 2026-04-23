@@ -32,18 +32,53 @@ const ImgPlaceholder = ({ label, aspect = '4/3', bg = '#e8e8e0', textColor = '#a
   </div>
 );
 
+// ─── HERO ANIMATION HELPERS ───────────────────────────────────────────────────
+const HERO_KEYFRAMES = `
+@keyframes ma2eFadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+`;
+// Animates a numeric value up to `target` over `duration` ms, then formats it.
+const useCountUp = (target, duration = 1600, start = true) => {
+  const [n, setN] = React.useState(0);
+  React.useEffect(() => {
+    if (!start) return;
+    let raf, t0;
+    const step = (t) => {
+      if (!t0) t0 = t;
+      const p = Math.min((t - t0) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setN(target * eased);
+      if (p < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration, start]);
+  return n;
+};
+const AnimatedStat = ({ target, format, delay = 0 }) => {
+  const [go, setGo] = React.useState(false);
+  React.useEffect(() => { const id = setTimeout(() => setGo(true), delay); return () => clearTimeout(id); }, [delay]);
+  const n = useCountUp(target, 1600, go);
+  return <>{format(n)}</>;
+};
+
 // ─── HERO ─────────────────────────────────────────────────────────────────────
 const HomeHero = ({ heroStyle, accent, navigate }) => {
   const bg = heroStyle === 'flat' ? C.dark
     : heroStyle === 'dark' ? '#001208'
     : C.dark;
 
+  const stats = [
+    { target: 7335, l: 'Adhérents actifs', format: (n) => Math.round(n).toLocaleString('fr-FR').replace(/,/g, ' ') },
+    { target: 2.4, l: 'FCFA crédits accordés', format: (n) => n.toFixed(1).replace('.', ',') + ' Mds' },
+    { target: 14, l: "d'activité", format: (n) => Math.round(n) + ' ans' },
+    { target: 9, l: 'Produits financiers', format: (n) => Math.round(n).toString() },
+  ];
+
   return (
     <section style={{ background: bg, minHeight: '88vh', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', position: 'relative', overflow: 'hidden' }}>
-      {/* Full-bleed image placeholder */}
-      <div style={{ position: 'absolute', inset: 0 }}>
-        <ImgPlaceholder label={"Photo institutionnelle\n(agents au travail ou bâtiment MA2E)"} aspect="auto" bg="#0a2a14" textColor="rgba(255,255,255,0.15)"/>
-      </div>
+      <style>{HERO_KEYFRAMES}</style>
+      {/* Full-bleed hero background */}
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: "url('uploads/bg11.jpeg')", backgroundSize: 'cover', backgroundPosition: 'center' }}/>
       {/* Gradient overlay */}
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,61,31,0.95) 0%, rgba(0,61,31,0.65) 50%, rgba(0,61,31,0.15) 100%)' }}/>
       {/* Subtle grid */}
@@ -52,7 +87,7 @@ const HomeHero = ({ heroStyle, accent, navigate }) => {
       {/* Content */}
       <div style={{ position: 'relative', maxWidth: 1280, margin: '0 auto', padding: '0 48px 80px', width: '100%' }}>
         {/* Badge */}
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 28 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 28, animation: 'ma2eFadeUp 0.7s ease-out 0.05s both' }}>
           <div style={{ width: 6, height: 6, background: accent, borderRadius: '50%' }}/>
           <span style={{ fontSize: 11, letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)' }}>
             Agréée BCEAO · SODECI · CIE · GS2E · CIPREL
@@ -60,17 +95,17 @@ const HomeHero = ({ heroStyle, accent, navigate }) => {
         </div>
 
         {/* Headline */}
-        <h1 style={{ fontSize: 68, fontWeight: 500, color: '#fff', letterSpacing: '-1px', lineHeight: 1.08, maxWidth: 780, marginBottom: 28, textWrap: 'pretty' }}>
+        <h1 style={{ fontSize: 68, fontWeight: 500, color: '#fff', letterSpacing: '-1px', lineHeight: 1.08, maxWidth: 780, marginBottom: 28, textWrap: 'pretty', animation: 'ma2eFadeUp 0.8s ease-out 0.2s both' }}>
           L'épargne qui fait grandir vos{' '}
           <em style={{ fontStyle: 'normal', color: accent }}>projets de vie.</em>
         </h1>
 
-        <p style={{ fontSize: 17, color: 'rgba(255,255,255,0.65)', lineHeight: 1.65, maxWidth: 520, marginBottom: 44 }}>
+        <p style={{ fontSize: 17, color: 'rgba(255,255,255,0.65)', lineHeight: 1.65, maxWidth: 520, marginBottom: 44, animation: 'ma2eFadeUp 0.8s ease-out 0.4s both' }}>
           La MA2E accompagne les agents de l'eau et de l'électricité depuis 2009 — épargne, crédit, immobilier.
         </p>
 
         {/* CTAs */}
-        <div style={{ display: 'flex', gap: 32, alignItems: 'center', marginBottom: 64 }}>
+        <div style={{ display: 'flex', gap: 32, alignItems: 'center', marginBottom: 64, animation: 'ma2eFadeUp 0.8s ease-out 0.55s both' }}>
           <button onClick={() => navigate('services')} style={{
             background: accent, color: '#fff', border: 'none', padding: '14px 30px',
             fontSize: 14, fontFamily: 'Inter, sans-serif', cursor: 'pointer', fontWeight: 500,
@@ -93,14 +128,11 @@ const HomeHero = ({ heroStyle, accent, navigate }) => {
 
         {/* Stats bar */}
         <div style={{ display: 'flex', gap: 0, borderTop: '1px solid rgba(255,255,255,0.12)', paddingTop: 36 }}>
-          {[
-            { v: '7 335', l: 'Adhérents actifs' },
-            { v: '2,4 Mds', l: 'FCFA crédits accordés' },
-            { v: '14 ans', l: "d'activité" },
-            { v: '9', l: 'Produits financiers' },
-          ].map((s, i) => (
-            <div key={s.l} style={{ flex: 1, paddingRight: 32, borderRight: i < 3 ? '1px solid rgba(255,255,255,0.1)' : 'none', marginRight: i < 3 ? 32 : 0 }}>
-              <div style={{ fontSize: 30, fontWeight: 500, color: '#fff', letterSpacing: '-0.5px', lineHeight: 1 }}>{s.v}</div>
+          {stats.map((s, i) => (
+            <div key={s.l} style={{ flex: 1, paddingRight: 32, borderRight: i < 3 ? '1px solid rgba(255,255,255,0.1)' : 'none', marginRight: i < 3 ? 32 : 0, animation: `ma2eFadeUp 0.7s ease-out ${0.75 + i * 0.12}s both` }}>
+              <div style={{ fontSize: 30, fontWeight: 500, color: '#fff', letterSpacing: '-0.5px', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>
+                <AnimatedStat target={s.target} format={s.format} delay={750 + i * 120}/>
+              </div>
               <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 6, letterSpacing: '0.2px' }}>{s.l}</div>
             </div>
           ))}
@@ -113,9 +145,9 @@ const HomeHero = ({ heroStyle, accent, navigate }) => {
 // ─── SERVICES SECTION ─────────────────────────────────────────────────────────
 const HomeServices = ({ accent, navigate }) => {
   const cards = [
-    { title: 'Épargne rémunérée', label: 'Épargne', desc: 'Taux compétitifs, gestion transparente. Trois formules pour constituer votre capital selon votre horizon.', img: 'Photo : conseillère MA2E\nauprès d\'un adhérent', hash: 'epargne', color: C.green },
-    { title: 'Crédit à taux réduit', label: 'Crédit', desc: 'Financement rapide et accessible pour vos projets personnels, professionnels ou scolaires.', img: 'Photo : adhérent\ndevant sa nouvelle maison', hash: 'credit', color: accent, featured: true },
-    { title: 'Projet immobilier', label: 'Immobilier', desc: 'Accédez à la propriété via nos programmes de logements à prix maîtrisés — résidence AKANDJÉ.', img: 'Photo : résidence AKANDJÉ\nBingerville', hash: 'immobilier', color: accent },
+    { title: 'Épargne rémunérée', label: 'Épargne', desc: 'Taux compétitifs, gestion transparente. Trois formules pour constituer votre capital selon votre horizon.', img: 'Photo : conseillère MA2E\nauprès d\'un adhérent', src: 'https://ma2e.ci/_assets/_img/img/epargnecomplementaire2.jpg', hash: 'epargne', color: C.green },
+    { title: 'Crédit à taux réduit', label: 'Crédit', desc: 'Financement rapide et accessible pour vos projets personnels, professionnels ou scolaires.', img: 'Photo : adhérent\ndevant sa nouvelle maison', src: 'https://ma2e.ci/_assets/_img/img/investment.jpg', hash: 'credit', color: accent, featured: true },
+    { title: 'Projet immobilier', label: 'Immobilier', desc: 'Accédez à la propriété via nos programmes de logements à prix maîtrisés — résidence AKANDJÉ.', img: 'Photo : résidence AKANDJÉ\nBingerville', src: 'https://ma2e.ci/_assets/_img/imageimm2.jpg', hash: 'immobilier', color: accent },
   ];
 
   return (
@@ -146,9 +178,13 @@ const HomeServices = ({ accent, navigate }) => {
             onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
               {/* Image */}
               <div style={{ height: 220, overflow: 'hidden' }}>
-                <ImgPlaceholder label={card.img} aspect="auto"
-                  bg={card.featured ? '#0a2a14' : '#ede8e0'}
-                  textColor={card.featured ? 'rgba(255,255,255,0.2)' : '#bbb'}/>
+                {card.src ? (
+                  <img src={card.src} alt={card.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}/>
+                ) : (
+                  <ImgPlaceholder label={card.img} aspect="auto"
+                    bg={card.featured ? '#0a2a14' : '#ede8e0'}
+                    textColor={card.featured ? 'rgba(255,255,255,0.2)' : '#bbb'}/>
+                )}
               </div>
               {/* Content */}
               <div style={{ padding: '28px 28px 32px' }}>
@@ -173,7 +209,7 @@ const HomeAbout = ({ navigate }) => (
     <div style={{ maxWidth: 1280, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', minHeight: 500 }}>
       {/* Image side */}
       <div style={{ background: '#d4d0c8', position: 'relative', minHeight: 460 }}>
-        <ImgPlaceholder label={"Photo : Direction générale\nou bâtiment siège MA2E"} aspect="auto" bg="#d0ccc4" textColor="#aaa"/>
+        <img src="https://ma2e.ci/_assets/_img/ghgh.png" alt="Siège MA2E" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}/>
         <div style={{ position: 'absolute', bottom: 32, left: 32, right: 32 }}>
           <div style={{ background: C.green, display: 'inline-flex', padding: '10px 18px', gap: 10, alignItems: 'center' }}>
             <span style={{ fontSize: 11, color: '#fff', letterSpacing: '0.5px' }}>Agréée BCEAO depuis 2011</span>
@@ -248,9 +284,9 @@ const HomePlatform = ({ accent, navigate }) => (
 // ─── NEWS STRIP ───────────────────────────────────────────────────────────────
 const HomeNews = ({ accent, navigate }) => {
   const items = [
-    { cat: 'Plateforme', date: '18 avril 2026', title: 'Lancement officiel de la nouvelle plateforme E-MA2E' },
-    { cat: 'Immobilier', date: '5 mars 2026', title: 'Ouverture de la 2ᵉ tranche AKANDJÉ — Bingerville' },
-    { cat: 'Gouvernance', date: '20 février 2026', title: "Assemblée générale ordinaire 2025 — résultats" },
+    { cat: 'Plateforme', date: '18 avril 2026', title: 'Lancement officiel de la nouvelle plateforme E-MA2E', src: 'https://ma2e.ci/_assets/_img/accueil/bg1.JPG' },
+    { cat: 'Immobilier', date: '5 mars 2026', title: 'Ouverture de la 2ᵉ tranche AKANDJÉ — Bingerville', src: 'https://ma2e.ci/_assets/_img/imageimm2.jpg' },
+    { cat: 'Gouvernance', date: '20 février 2026', title: "Assemblée générale ordinaire 2025 — résultats", src: 'https://ma2e.ci/_assets/_img/accueil/bg11.JPG' },
   ];
   const catC = { Plateforme: C.green, Immobilier: '#7c5cbf', Gouvernance: C.dark };
 
@@ -271,8 +307,8 @@ const HomeNews = ({ accent, navigate }) => {
               onClick={() => navigate('news')}
               onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-3px)'}
               onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
-              <div style={{ height: 180, background: i === 0 ? '#d8d4cc' : '#e8e8e0' }}>
-                <ImgPlaceholder label={`Photo actualité\n${n.cat}`} aspect="auto" bg={i === 0 ? '#d0ccc4' : '#e0dcd4'} textColor="#bbb"/>
+              <div style={{ height: 180, overflow: 'hidden' }}>
+                <img src={n.src} alt={n.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}/>
               </div>
               <div style={{ padding: '24px 28px 28px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>

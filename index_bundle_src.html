@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MA2E — Mutuelle des Agents de l'Eau et de l'Électricité</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
+body { font-family: 'Inter', sans-serif; font-weight: 400; color: #1a2e1a; background: #fff; overflow-x: hidden; }
+
+/* Plus Jakarta Sans — headings, nav, buttons, labels */
+h1, h2, h3, h4, h5, h6 { font-family: 'Plus Jakarta Sans', sans-serif; }
+nav, button, label, th { font-family: 'Plus Jakarta Sans', sans-serif; }
+/* Stats, eyebrows, badges */
+.stat-val, .eyebrow { font-family: 'Plus Jakarta Sans', sans-serif; }
+/* Override inline fontFamily on buttons — Jakarta for all UI chrome */
+button { font-family: 'Plus Jakarta Sans', sans-serif !important; }
+/* Body copy — Inter */
+p, li, span, td, input, select, textarea { font-family: 'Inter', sans-serif; }
+
+input[type=range] { -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; outline: none; cursor: pointer; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 2.5px solid #F7941D; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.18); }
+input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 2.5px solid #F7941D; cursor: pointer; }
+
+/* Tweaks panel */
+#tweaks-panel {
+  display: none; position: fixed; bottom: 24px; right: 24px;
+  background: #fff; border: 1px solid #e0e0d8; border-radius: 8px;
+  padding: 20px; width: 250px; z-index: 9999;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+  font-family: 'Inter', sans-serif; font-size: 13px;
+}
+#tweaks-panel.open { display: block; }
+#tweaks-panel h4 { font-size: 11px; font-weight: 500; margin-bottom: 16px; color: #003d1f; letter-spacing: '1px'; text-transform: uppercase; }
+#tweaks-panel label { display: block; color: #888; margin-bottom: 5px; margin-top: 12px; font-size: 11.5px; }
+.tw-row { display: flex; gap: 6px; margin-top: 4px; }
+.tw-btn {
+  flex: 1; padding: 6px 0; border: 1px solid #e0e0d8; border-radius: 4px;
+  background: #fafafa; font-size: 11.5px; cursor: pointer;
+  font-family: 'Inter', sans-serif; color: #555; transition: all 0.12s;
+}
+.tw-btn.active { background: #003d1f; color: #fff; border-color: #003d1f; }
+.tw-divider { height: 1px; background: #f0f0e8; margin: 14px 0; }
+</style>
+
+<template id="__bundler_thumbnail" data-bg-color="#003d1f">
+  <svg viewBox="0 0 120 80" xmlns="http://www.w3.org/2000/svg">
+    <rect width="120" height="80" fill="#003d1f"/>
+    <rect x="38" y="26" width="44" height="28" rx="3" fill="#00A651"/>
+    <text x="60" y="45" text-anchor="middle" font-family="sans-serif" font-size="14" font-weight="bold" fill="white" letter-spacing="-1">MA<tspan fill="#F7941D">2</tspan>E</text>
+  </svg>
+</template>
+</head>
+<body>
+
+<div id="root"></div>
+
+<div id="tweaks-panel">
+  <h4>Tweaks</h4>
+  <label>Style du héros</label>
+  <div class="tw-row">
+    <button class="tw-btn active" id="tw-diag" onclick="setHeroStyle('diagonal')">Diagonal</button>
+    <button class="tw-btn" id="tw-flat" onclick="setHeroStyle('flat')">Plat</button>
+    <button class="tw-btn" id="tw-dark" onclick="setHeroStyle('dark')">Sombre</button>
+  </div>
+  <div class="tw-divider"></div>
+  <label>Couleur d'accent</label>
+  <div class="tw-row">
+    <button class="tw-btn active" id="tw-orange" onclick="setAccent('#F7941D')">Orange</button>
+    <button class="tw-btn" id="tw-gold" onclick="setAccent('#e8b44a')">Or</button>
+    <button class="tw-btn" id="tw-red" onclick="setAccent('#e05252')">Rouge</button>
+  </div>
+</div>
+
+<script type="text/babel" src="shared.jsx"></script>
+<script type="text/babel" src="home.jsx"></script>
+<script type="text/babel" src="pages-a.jsx"></script>
+<script type="text/babel" src="pages-b.jsx"></script>
+<script type="text/babel" src="app.jsx"></script>
+
+<script>
+// Tweaks panel bridge
+window.addEventListener('message', e => {
+  if (e.data?.type === '__activate_edit_mode') document.getElementById('tweaks-panel').classList.add('open');
+  if (e.data?.type === '__deactivate_edit_mode') document.getElementById('tweaks-panel').classList.remove('open');
+});
+window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+
+function setHeroStyle(val) {
+  ['diag','flat','dark'].forEach(k => document.getElementById('tw-'+k).classList.remove('active'));
+  document.getElementById('tw-' + {diagonal:'diag',flat:'flat',dark:'dark'}[val]).classList.add('active');
+  if (window.__setTweaks) window.__setTweaks(t => ({ ...t, heroStyle: val }));
+  window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { heroStyle: val } }, '*');
+}
+function setAccent(val) {
+  ['orange','gold','red'].forEach(k => document.getElementById('tw-'+k).classList.remove('active'));
+  const map = { '#F7941D':'orange', '#e8b44a':'gold', '#e05252':'red' };
+  document.getElementById('tw-' + map[val]).classList.add('active');
+  if (window.__setTweaks) window.__setTweaks(t => ({ ...t, accent: val }));
+  window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { accent: val } }, '*');
+}
+</script>
+</body>
+</html>
