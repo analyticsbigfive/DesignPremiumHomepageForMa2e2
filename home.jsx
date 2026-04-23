@@ -35,6 +35,38 @@ const ImgPlaceholder = ({ label, aspect = '4/3', bg = '#e8e8e0', textColor = '#a
 // ─── HERO ANIMATION HELPERS ───────────────────────────────────────────────────
 const HERO_KEYFRAMES = `
 @keyframes ma2eFadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+@keyframes ma2eKenBurns {
+  0% { transform: scale(1.08) translate(0, 0); }
+  50% { transform: scale(1.15) translate(-1.5%, -1%); }
+  100% { transform: scale(1.08) translate(0, 0); }
+}
+@keyframes ma2eGridDrift {
+  from { background-position: 0 0; }
+  to { background-position: 80px 0; }
+}
+@keyframes ma2eShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes ma2eAccentGrow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes ma2eScrollDown {
+  0% { transform: translateY(0); opacity: 0; }
+  30% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { transform: translateY(10px); opacity: 0; }
+}
+@keyframes ma2ePulseDot {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(247,148,29,0.55); }
+  50% { transform: scale(1.15); box-shadow: 0 0 0 8px rgba(247,148,29,0); }
+}
+.ma2e-shimmer-em {
+  background: linear-gradient(90deg, currentColor 0%, currentColor 40%, #fff 50%, currentColor 60%, currentColor 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: ma2eShimmer 4.5s ease-in-out 1.2s infinite;
+}
 `;
 // Animates a numeric value up to `target` over `duration` ms, then formats it.
 const useCountUp = (target, duration = 1600, start = true) => {
@@ -78,17 +110,17 @@ const HomeHero = ({ heroStyle, accent, navigate }) => {
     <section style={{ background: bg, minHeight: '88vh', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', position: 'relative', overflow: 'hidden' }}>
       <style>{HERO_KEYFRAMES}</style>
       {/* Full-bleed hero background */}
-      <div style={{ position: 'absolute', inset: 0, backgroundImage: "url('uploads/bg11.jpeg')", backgroundSize: 'cover', backgroundPosition: 'center' }}/>
+      <div style={{ position: 'absolute', inset: 0, backgroundImage: "url('uploads/bg11.jpeg')", backgroundSize: 'cover', backgroundPosition: 'center', animation: 'ma2eKenBurns 24s ease-in-out infinite', willChange: 'transform' }}/>
       {/* Gradient overlay */}
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,61,31,0.95) 0%, rgba(0,61,31,0.65) 50%, rgba(0,61,31,0.15) 100%)' }}/>
       {/* Subtle grid */}
-      <div style={{ position: 'absolute', inset: 0, opacity: 0.04, backgroundImage: 'repeating-linear-gradient(90deg, rgba(255,255,255,1) 0px, rgba(255,255,255,1) 1px, transparent 1px, transparent 80px)', pointerEvents: 'none' }}/>
+      <div style={{ position: 'absolute', inset: 0, opacity: 0.04, backgroundImage: 'repeating-linear-gradient(90deg, rgba(255,255,255,1) 0px, rgba(255,255,255,1) 1px, transparent 1px, transparent 80px)', pointerEvents: 'none', animation: 'ma2eGridDrift 18s linear infinite' }}/>
 
       {/* Content */}
       <div style={{ position: 'relative', maxWidth: 1280, margin: '0 auto', padding: '0 48px 80px', width: '100%' }}>
         {/* Badge */}
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, marginBottom: 28, animation: 'ma2eFadeUp 0.7s ease-out 0.05s both' }}>
-          <div style={{ width: 6, height: 6, background: accent, borderRadius: '50%' }}/>
+          <div style={{ width: 6, height: 6, background: accent, borderRadius: '50%', animation: 'ma2ePulseDot 2.4s ease-in-out infinite' }}/>
           <span style={{ fontSize: 11, letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)' }}>
             Agréée BCEAO · SODECI · CIE · GS2E · CIPREL
           </span>
@@ -97,7 +129,7 @@ const HomeHero = ({ heroStyle, accent, navigate }) => {
         {/* Headline */}
         <h1 style={{ fontSize: 68, fontWeight: 500, color: '#fff', letterSpacing: '-1px', lineHeight: 1.08, maxWidth: 780, marginBottom: 28, textWrap: 'pretty', animation: 'ma2eFadeUp 0.8s ease-out 0.2s both' }}>
           L'épargne qui fait grandir vos{' '}
-          <em style={{ fontStyle: 'normal', color: accent }}>projets de vie.</em>
+          <em className="ma2e-shimmer-em" style={{ fontStyle: 'normal', color: accent }}>projets de vie.</em>
         </h1>
 
         <p style={{ fontSize: 17, color: 'rgba(255,255,255,0.65)', lineHeight: 1.65, maxWidth: 520, marginBottom: 44, animation: 'ma2eFadeUp 0.8s ease-out 0.4s both' }}>
@@ -136,6 +168,14 @@ const HomeHero = ({ heroStyle, accent, navigate }) => {
               <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 6, letterSpacing: '0.2px' }}>{s.l}</div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Scroll indicator */}
+      <div style={{ position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, animation: 'ma2eFadeUp 1s ease-out 1.4s both', pointerEvents: 'none' }}>
+        <span style={{ fontSize: 10, letterSpacing: '2px', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>Scroll</span>
+        <div style={{ width: 20, height: 32, border: '1px solid rgba(255,255,255,0.3)', borderRadius: 12, position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: 6, left: '50%', width: 2, height: 6, background: accent, borderRadius: 1, transform: 'translateX(-50%)', animation: 'ma2eScrollDown 1.8s ease-in-out infinite' }}/>
         </div>
       </div>
     </section>
